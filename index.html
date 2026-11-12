@@ -13,6 +13,7 @@
   --paper:#eceae6; --ink:#111; --serif:'Cormorant Garamond',Georgia,serif; --script:'Pinyon Script','Snell Roundhand',cursive;
 }
 *{box-sizing:border-box;margin:0}
+html{-webkit-text-size-adjust:100%}
 html,body{min-height:100%}
 body{
   font-family:var(--serif);color:var(--ink);background-color:var(--paper);
@@ -28,7 +29,7 @@ section{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;al
 /* ---------- Sobre ---------- */
 h1{font-weight:600;font-size:clamp(2rem,7vw,3.4rem);line-height:1.1}
 .script{font-family:var(--script);color:var(--navy);font-size:clamp(2.6rem,10vw,4.6rem);line-height:1;margin:.1em 0 .6em}
-.env-btn{all:unset;cursor:pointer;display:block;width:min(88vw,540px);perspective:1200px;-webkit-tap-highlight-color:transparent}
+.env-btn{all:unset;cursor:pointer;display:block;width:min(88vw,600px,max(250px,calc((100dvh - 340px)*1.5)));perspective:1200px;-webkit-tap-highlight-color:transparent}
 .env-btn:focus-visible{outline:3px solid var(--gold);outline-offset:8px}
 .env{position:relative;aspect-ratio:3/2;background:
   repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 3px),var(--navy);
@@ -67,16 +68,30 @@ h1{font-weight:600;font-size:clamp(2rem,7vw,3.4rem);line-height:1.1}
 .row small{display:block;font-size:.95rem;color:#444}
 .row b{display:block;font-size:1.45rem;font-weight:600;color:var(--navy)}
 .actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:28px}
-.btn{font:600 1.1rem var(--serif);text-decoration:none;padding:12px 22px;border-radius:2px;border:1.5px solid var(--navy);color:var(--navy);background:transparent}
+.btn{text-align:center;font:600 1.1rem var(--serif);text-decoration:none;padding:12px 22px;border-radius:2px;border:1.5px solid var(--navy);color:var(--navy);background:transparent}
 .btn.primary{background:var(--navy);color:#fff}
 .btn:focus-visible,.btn:hover{outline:3px solid var(--gold);outline-offset:2px}
+.paper{overflow-wrap:anywhere}
 .thanks{font-family:var(--script);font-size:2.4rem;margin-top:1em}
+@media (max-width:420px){
+  section{padding:76px 14px 32px}
+  .paper{padding:38px 18px 32px}
+  .actions .btn{flex:1 1 100%}
+  .row b{font-size:1.3rem}
+}
+@media (max-height:520px){
+  section{justify-content:flex-start;padding-top:64px}
+  h1{font-size:1.7rem}
+  .script{font-size:2.3rem;margin-bottom:.3em}
+  .bottom{font-size:1.9rem;margin-top:.4em}
+  .env-btn{width:min(60vw,300px)}
+}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01s!important;transition-delay:0s!important}}
 </style>
 </head>
 <body>
 
-<div class="bunting" aria-hidden="true"><svg id="flags" viewBox="0 0 1000 56" preserveAspectRatio="none"></svg></div>
+<div class="bunting" aria-hidden="true"><svg id="flags" width="100%" height="56"></svg></div>
 
 <!-- Pantalla 1: el sobre -->
 <section id="intro">
@@ -139,16 +154,19 @@ $('fMap').href = INVITACION.mapa;
 $('fRsvp').href = "https://wa.me/" + INVITACION.whatsapp + "?text=" + encodeURIComponent(INVITACION.mensajeRsvp);
 document.title = "Graduación de " + INVITACION.nombre;
 
-// Banderines
-(function(){
-  let s = '<path d="M0 6 Q250 22 500 8 T1000 8" stroke="#333" fill="none" stroke-width="1"/>';
-  for (let i = 0; i < 20; i++) {
-    const x = 6 + i * 50, y = 8 + 10 * Math.sin(i * .63) * .6;
-    const fill = i % 2 ? '#d9a93b' : '#14315f';
-    s += `<path d="M${x} ${y} h34 l-17 38z" fill="${fill}"/>`;
+// Banderines (se adaptan al ancho de la pantalla)
+function drawFlags(){
+  const W = window.innerWidth, size = W < 600 ? 24 : 34, gap = size + (W < 600 ? 10 : 16), sag = W < 600 ? 5 : 9;
+  let s = `<path d="M0 6 Q${W/2} ${6+2*sag} ${W} 6" stroke="#333" fill="none" stroke-width="1"/>`;
+  for (let i = 0, x = 4; x < W; i++, x += gap) {
+    const t = (x + size/2) / W, y = 6 + 4 * sag * t * (1 - t);
+    s += `<path d="M${x} ${y} h${size} l${-size/2} ${size*1.1}z" fill="${i % 2 ? '#d9a93b' : '#14315f'}"/>`;
   }
+  $('flags').setAttribute('viewBox', `0 0 ${W} 56`);
   $('flags').innerHTML = s;
-})();
+}
+drawFlags();
+window.addEventListener('resize', drawFlags);
 
 // Abrir el sobre
 const intro = $('intro'), env = $('env'), btn = $('envBtn');
